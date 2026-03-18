@@ -1568,6 +1568,7 @@
     let currentLoggedInUser = ""; // Tracks currently logged-in user email
     const authorizedEmail = "chisom@lcpd.org.ng";
     const authorizedPassword = "EiEgit@";
+    const importedDataStorageKey = "eiewg-directory-imported-data-v1";
 
     const escapeHtml = (value) => String(value || "")
       .replaceAll("&", "&amp;")
@@ -1578,6 +1579,33 @@
 
     function textValue(value) {
       return String(value || "").trim();
+    }
+
+    function saveImportedOrganizationsToStorage() {
+      try {
+        localStorage.setItem(importedDataStorageKey, JSON.stringify(organizations));
+      } catch (error) {
+        // Ignore storage failures (for example, private mode restrictions).
+      }
+    }
+
+    function loadImportedOrganizationsFromStorage() {
+      try {
+        const raw = localStorage.getItem(importedDataStorageKey);
+        if (!raw) {
+          return null;
+        }
+
+        const parsed = JSON.parse(raw);
+        const source = Array.isArray(parsed) ? parsed : (parsed && parsed.organizations);
+        if (!Array.isArray(source)) {
+          return null;
+        }
+
+        return normalizeImportedOrganizations(source);
+      } catch (error) {
+        return null;
+      }
     }
 
     function rebuildOrganizationTypes() {
@@ -1756,7 +1784,7 @@
         organization: getFieldValue(row, ["organization full name", "organization", "organisation full name", "organisation"]),
         acronym: getFieldValue(row, ["acronym"]),
         organizationType: getFieldValue(row, ["organization type", "type", "organisation type"]).toUpperCase(),
-        membership: (getFieldValue(row, ["membership", "member category"]) || fallbackMembership || "").toLowerCase(),
+        membership: (fallbackMembership || getFieldValue(row, ["membership", "member category"]) || "").toLowerCase(),
         fullName,
         designation: getFieldValue(row, ["designation", "title", "position"]) || "N/A",
         email: getFieldValue(row, ["email", "mail"]).toLowerCase(),
@@ -1788,7 +1816,7 @@
 
         const target = grouped.get(key);
         const rowPriority = Number(row.sourcePriority) || 1;
-        if (row.membership && (!target.membership || rowPriority >= target.membershipPriority)) {
+        if (row.membership && (!target.membership || rowPriority <= target.membershipPriority)) {
           target.membership = textValue(row.membership).toLowerCase();
           target.membershipPriority = rowPriority;
         }
@@ -1806,7 +1834,7 @@
           : `name:${contact.fullName.toLowerCase()}`;
 
         const existingContact = target.contactMap.get(contactKey);
-        if (!existingContact || contact.sourcePriority >= existingContact.sourcePriority) {
+        if (!existingContact || contact.sourcePriority <= existingContact.sourcePriority) {
           target.contactMap.set(contactKey, contact);
         }
       });
@@ -1887,6 +1915,7 @@
       membershipFilter = "all";
       organizationTypeFilter = "all";
       searchInput.value = "";
+      saveImportedOrganizationsToStorage();
       rebuildOrganizationTypes();
       applySearch();
     }
@@ -2260,6 +2289,12 @@
     });
 
     searchInput.addEventListener("input", applySearch);
+
+    const storedOrganizations = loadImportedOrganizationsFromStorage();
+    if (Array.isArray(storedOrganizations)) {
+      organizations = storedOrganizations;
+      filtered = [...organizations];
+    }
 
     rebuildOrganizationTypes();
     setActiveMemberButton();
