@@ -967,7 +967,8 @@
         throw new Error("Excel engine missing. Keep xlsx.full.min.js in the same folder for workbook import/export.");
       }
 
-      const response = await fetch(url, { cache: "no-store" });
+      const cacheBustedUrl = `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`;
+      const response = await fetch(cacheBustedUrl, { cache: "no-store" });
       if (!response.ok) {
         throw new Error(`Could not load workbook (${response.status}).`);
       }
@@ -994,16 +995,18 @@
     }
 
     async function initializeOrganizations() {
-      const storedOrganizations = loadImportedOrganizationsFromStorage();
-      if (Array.isArray(storedOrganizations)) {
-        applyImportedOrganizations(storedOrganizations, false);
-        return;
-      }
-
       try {
         const imported = await loadOrganizationsFromWorkbookUrl(defaultWorkbookUrl);
-        applyImportedOrganizations(imported, false);
+        applyImportedOrganizations(imported, true);
       } catch (error) {
+        const storedOrganizations = loadImportedOrganizationsFromStorage();
+        if (Array.isArray(storedOrganizations)) {
+          applyImportedOrganizations(storedOrganizations, false);
+          loadErrorMessage = "Workbook could not be loaded, so cached data is shown. Update Contact list.xlsx and refresh to sync.";
+          renderList();
+          return;
+        }
+
         organizations = [];
         filtered = [];
         openId = null;
