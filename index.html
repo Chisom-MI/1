@@ -655,7 +655,7 @@
       if (currentLoggedInUser === authorizedEmail) {
         loginStatus.className = "login-status logged-in";
         loginStatus.innerHTML = `
-          <span class="login-status-text">? Logged in as: ${escapeHtml(currentLoggedInUser)} (admin)</span>
+          <span class="login-status-text">Logged in as: ${escapeHtml(currentLoggedInUser)} (admin)</span>
           <button type="button" class="logout-btn" id="logoutBtn">Logout</button>
         `;
         importBtn.hidden = false;
@@ -695,7 +695,7 @@
       }
 
       currentLoggedInUser = email;
-      setAdminStatus("? Login successful! You now have admin access.");
+      setAdminStatus("Login successful! You now have admin access.");
       setTimeout(() => {
         closeAdminPanel(false);
         updateLoginStatus();
@@ -1244,9 +1244,9 @@
           <button type="button" class="org-trigger" aria-expanded="${isOpen}">
             <div>
               <div class="org-title">${escapeHtml(org.organization)}</div>
-              <div class="org-meta">${escapeHtml(org.organizationType || "Type not set")} • ${org.contactCount} contact${org.contactCount === 1 ? "" : "s"}</div>
+              <div class="org-meta">${escapeHtml(org.organizationType || "Type not set")} - ${org.contactCount} contact${org.contactCount === 1 ? "" : "s"}</div>
             </div>
-            <span class="org-chevron${isOpen ? " open" : ""}">?</span>
+            <span class="org-chevron${isOpen ? " open" : ""}">v</span>
           </button>
 
           <div class="org-details${isOpen ? " open" : ""}">
