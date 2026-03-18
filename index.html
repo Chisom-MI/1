@@ -1734,13 +1734,16 @@
 
     function getSheetImportPriority(sheetName) {
       const value = textValue(sheetName).toLowerCase();
-      if (value === "all members") {
+      if (value.includes("full")) {
         return 1;
       }
-      if (value.includes("full") || value.includes("associate") || value.includes("observer") || value.includes("oberserver")) {
+      if (value.includes("associate")) {
+        return 2;
+      }
+      if (value.includes("observer") || value.includes("oberserver")) {
         return 3;
       }
-      return 2;
+      return 4;
     }
 
     function normalizeFlatContactRow(row, fallbackMembership, sourcePriority = 1) {
@@ -1933,7 +1936,6 @@
       XLSX.utils.book_append_sheet(workbook, buildWorksheet(fullRows, headers), "Full members");
       XLSX.utils.book_append_sheet(workbook, buildWorksheet(associateRows, headers), "Associate members");
       XLSX.utils.book_append_sheet(workbook, buildWorksheet(observerRows, headers), "Oberserver members");
-      XLSX.utils.book_append_sheet(workbook, buildWorksheet(allRows, headers), "All members");
 
       const stamp = new Date().toISOString().replace(/[.:]/g, "-");
       XLSX.writeFile(workbook, `Contact list.current.${stamp}.xlsx`);
@@ -1996,16 +1998,11 @@
               || lower.includes("oberserver");
           });
 
-          const allMembersSheet = sheetNames.find((sheetName) => textValue(sheetName).toLowerCase() === "all members");
-
-          let targetSheets = [];
-          if (categorySheets.length) {
-            targetSheets = categorySheets;
-          } else if (allMembersSheet) {
-            targetSheets = [allMembersSheet];
-          } else {
-            targetSheets = [...sheetNames];
+          if (!categorySheets.length) {
+            throw new Error("Workbook must contain at least one of these sheets: Full members, Associate members, Oberserver members.");
           }
+
+          const targetSheets = [...categorySheets];
 
           targetSheets = targetSheets.sort((a, b) => getSheetImportPriority(a) - getSheetImportPriority(b));
 
