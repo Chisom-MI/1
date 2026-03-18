@@ -1,0 +1,2275 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Organization Directory</title>
+  <style>
+    :root {
+      --bg: #f5f8fd;
+      --panel: #ffffff;
+      --ink: #0d2340;
+      --muted: #5f7391;
+      --line: #d8e3f2;
+      --primary: #1f66c2;
+      --primary-strong: #1254aa;
+      --chip: #edf4ff;
+      --soft: #f7fbff;
+      --danger: #b83d3d;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Calibri, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      padding: 10px;
+    }
+
+    .shell {
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 12px 28px rgba(20, 49, 90, 0.08);
+      overflow: hidden;
+      animation: rise 350ms ease-out;
+    }
+
+    .hero {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brand-logo {
+      width: 240px;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      background: #fff;
+    }
+
+    .brand-text {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .kicker {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.55rem;
+      line-height: 1.12;
+      font-weight: 700;
+    }
+
+    .subtext {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .member-filters,
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 10px;
+    }
+
+    .member-btn {
+      border: 1px solid var(--primary);
+      background: var(--primary);
+      color: #fff;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease, transform 120ms ease;
+    }
+
+    .member-btn:hover {
+      transform: translateY(-1px);
+      background: var(--primary-strong);
+      border-color: var(--primary-strong);
+    }
+
+    .member-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(31, 102, 194, 0.22);
+    }
+
+    .member-btn.active {
+      background: #0d4e9e;
+      border-color: #0d4e9e;
+    }
+
+    .member-btn.type-active {
+      background: #0b3f80;
+      border-color: #0b3f80;
+    }
+
+    .action-btn {
+      background: #2b74d1;
+      border-color: #2b74d1;
+    }
+
+    .auth-panel {
+      margin: 0 0 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--soft);
+    }
+
+    .auth-panel[hidden] {
+      display: none !important;
+    }
+
+    .auth-row {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(2, minmax(160px, 1fr));
+      margin: 0;
+    }
+
+    .auth-action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .auth-input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.88rem;
+    }
+
+    .auth-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(31, 102, 194, 0.16);
+    }
+
+    .auth-status {
+      font-size: 0.8rem;
+      margin: 7px 0 0;
+      color: var(--muted);
+      min-height: 1.1em;
+    }
+
+    .auth-status.ok {
+      color: #1b5f12;
+    }
+
+    .auth-status.error {
+      color: var(--danger);
+    }
+
+    .login-status {
+      font-size: 0.88rem;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--chip);
+      color: var(--muted);
+      margin: 0 0 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .login-status.logged-in {
+      background: #d4f4dd;
+      color: #1b5f12;
+    }
+
+    .login-status.guest {
+      background: var(--chip);
+      color: var(--muted);
+    }
+
+    .login-status-text {
+      font-weight: 500;
+    }
+
+    .logout-btn {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 0.85rem;
+      padding: 2px 4px;
+      margin: 0;
+    }
+
+    .logout-btn:hover {
+      opacity: 0.8;
+    }
+
+    .search {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: #fff;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .search:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(31, 102, 194, 0.16);
+    }
+
+    .layout {
+      max-height: 58vh;
+      overflow: auto;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .org-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .org-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+      transition: border-color 150ms ease, box-shadow 150ms ease, transform 120ms ease;
+      opacity: 0;
+      transform: translateY(3px);
+      animation: fadeSlide 240ms ease forwards;
+    }
+
+    .org-item:hover {
+      transform: translateY(-1px);
+      border-color: #b6cdef;
+      box-shadow: 0 6px 14px rgba(19, 67, 128, 0.08);
+    }
+
+    .org-item.active {
+      border-color: #9abbe7;
+      box-shadow: 0 8px 16px rgba(20, 74, 146, 0.11);
+      background: #fbfdff;
+    }
+
+    .org-trigger {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 0;
+      color: inherit;
+      font: inherit;
+    }
+
+    .org-title {
+      font-weight: 700;
+      font-size: 0.93rem;
+      line-height: 1.25;
+      margin-bottom: 3px;
+    }
+
+    .org-meta {
+      font-size: 0.79rem;
+      color: var(--muted);
+    }
+
+    .org-chevron {
+      font-size: 1.06rem;
+      color: var(--primary);
+      transition: transform 160ms ease;
+      line-height: 1;
+      transform-origin: center;
+    }
+
+    .org-chevron.open {
+      transform: rotate(180deg);
+    }
+
+    .org-details {
+      display: none;
+      margin-top: 10px;
+      animation: reveal 200ms ease;
+    }
+
+    .org-details.open {
+      display: block;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .chip {
+      background: var(--chip);
+      border: 1px solid #d5e3fa;
+      color: #1a4174;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    thead th {
+      text-align: left;
+      background: #f1f6ff;
+      color: #2b4e7d;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    tbody td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e7eef8;
+      vertical-align: top;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    a {
+      color: #1f66c2;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    .no-results {
+      padding: 14px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .page-footnote {
+      border-top: 1px solid var(--line);
+      background: #1f66c2;
+      padding: 12px 14px;
+    }
+
+    .footnote-title {
+      margin: 0 0 6px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .footnote-text {
+      margin: 0;
+      font-size: 0.84rem;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    .coord-title {
+      margin: 10px 0 4px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .coord-list {
+      margin: 0;
+      padding-left: 16px;
+      color: #ffffff;
+      font-size: 0.83rem;
+      line-height: 1.45;
+    }
+
+    .coord-list li {
+      margin: 2px 0;
+    }
+
+    .page-footnote a {
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    @media (max-width: 980px) {
+      body { padding: 8px; }
+      .brand-logo { width: 210px; }
+      .auth-row { grid-template-columns: 1fr; }
+      .layout { max-height: none; }
+      h1 { font-size: 1.3rem; }
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(-2px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="brand-row">
+        <img src="./eiewg-logo.png" alt="Nigeria Education in Emergencies Working Group logo" class="brand-logo" />
+        <div class="brand-text">
+          <div class="kicker">EiEWG Contacts</div>
+          <h1>Members Directory</h1>
+          <p class="subtext">Use filters to narrow the list, then click an organization to view details.</p>
+        </div>
+      </div>
+      <div id="memberFilters" class="member-filters" role="group" aria-label="Member categories">
+        <button type="button" class="member-btn" data-member-filter="full">Full members</button>
+        <button type="button" class="member-btn" data-member-filter="associate">Associate members</button>
+        <button type="button" class="member-btn" data-member-filter="observer">Oberserver members</button>
+        <button type="button" class="member-btn active" data-member-filter="all">All members</button>
+        <button type="button" id="typeFilterBtn" class="member-btn" aria-label="Filter by organization type">Organization type: All</button>
+      </div>
+      <div class="action-row" role="group" aria-label="Data actions">
+        <button type="button" id="importBtn" class="member-btn action-btn" hidden>Import</button>
+        <button type="button" id="exportBtn" class="member-btn action-btn" hidden>Export</button>
+        <button type="button" id="loginBtn" class="member-btn action-btn" style="background-color: #10a854; color: white;">Admin Login</button>
+      </div>
+      <div id="loginStatus" class="login-status guest">
+        <span class="login-status-text">Logged in as: Guest (limited view)</span>
+      </div>
+      <div id="adminPanel" class="auth-panel" aria-label="Admin login credentials" hidden>
+        <div class="auth-row">
+          <input id="adminEmail" class="auth-input" type="email" placeholder="Admin email" autocomplete="username" />
+          <input id="adminPassword" class="auth-input" type="password" placeholder="Admin password" autocomplete="current-password" />
+        </div>
+        <div class="auth-action-row">
+          <button type="button" id="adminLoginBtn" class="member-btn action-btn">Login</button>
+          <button type="button" id="adminCancelBtn" class="member-btn">Cancel</button>
+        </div>
+        <p id="adminStatus" class="auth-status">Enter admin credentials to view full contact details.</p>
+      </div>
+
+      <input id="importInput" type="file" accept=".xlsx,.xls,.csv,.json,application/json,text/csv" hidden />
+      <input id="searchInput" class="search" type="search" placeholder="Search by organization, acronym, or type" autocomplete="off" />
+    </section>
+
+    <section class="layout">
+      <div id="orgList" class="org-list"></div>
+    </section>
+
+    <footer class="page-footnote">
+      <p class="footnote-title">Process Note</p>
+      <p class="footnote-text">Please note that this is an ongoing process and will continue to update partners details in real time.</p>
+      <p class="footnote-text">For inquiries or support on the organization status or other information on this process reach out via: <a href="mailto:chisom@lcpd.org.ng">chisom@lcpd.org.ng</a>, <a href="tel:+2348038132205">08038132205</a>.</p>
+
+      <p class="coord-title">Education sector coordination team</p>
+      <ul class="coord-list">
+        <li>Cleobas James, SCI; <a href="tel:+2348030969826">+234 803 096 9826</a>, Email: <a href="mailto:james.cleobas@savethechildren.org">james.cleobas@savethechildren.org</a></li>
+        <li>Caroline Waruguru Mwai; <a href="tel:+2347074800963">+234 707 480 0963</a>, Email: <a href="mailto:cmwai@unicef.org">cmwai@unicef.org</a></li>
+        <li>Chisom Aniekwe, LCPD; <a href="tel:+2348038132205">+234 8038 132205</a>, Email: <a href="mailto:chisom@lcpd.org.ng">chisom@lcpd.org.ng</a></li>
+      </ul>
+    </footer>
+  </main>
+
+  <script src="./xlsx.full.min.js"></script>
+  <script>
+    let organizations = [
+    {
+        "id":  "org-1",
+        "organization":  "Assisting, Caring and Empowering Africans Foundation",
+        "acronym":  "ACE CHARITY",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Kiki James",
+                             "designation":  "Founder/CEO",
+                             "email":  "info@acecharityafrica.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Chioma Okafor",
+                             "designation":  "Deputy Director",
+                             "phone":  "+234 803 456 7890",
+                             "email":  "contact@org1.example.com"
+                         }]
+    },
+    {
+        "id":  "org-2",
+        "organization":  "Bela Socialite Development Initiative",
+        "acronym":  "BSDI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Stephen Sawa",
+                             "designation":  "Executive Director",
+                             "email":  "sawagarkida@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Grace Monguno",
+                             "designation":  "Finance Manager",
+                             "phone":  "+234 807 123 4567",
+                             "email":  "contact@org2.example.com"
+                         }]
+    },
+    {
+        "id":  "org-3",
+        "organization":  "Better Life Advocate for Community Development Initiative",
+        "acronym":  "BELA-CODE",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Benjamin Yohanna Lassa",
+                             "designation":  "Program Manager",
+                             "email":  "bela.code12@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Amina Ibrahim",
+                             "designation":  "Program Officer",
+                             "phone":  "+234 809 876 5432",
+                             "email":  "contact@org3.example.com"
+                         }]
+    },
+    {
+        "id":  "org-4",
+        "organization":  "Care Best Initiative",
+        "acronym":  "CBI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "REJOICE Mark",
+                             "designation":  "ED",
+                             "email":  "carebestinitiative19@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "David Eze",
+                             "designation":  "Compliance Officer",
+                             "phone":  "+234 801 234 5678",
+                             "email":  "contact@org4.example.com"
+                         }]
+    },
+    {
+        "id":  "org-5",
+        "organization":  "Center for child care and human development",
+        "acronym":  "C3HD",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Nana Firdausi Ilyasu",
+                             "designation":  "Education Coordinator GAC EIC",
+                             "email":  "nanailyasu@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Fatima Abdullahi",
+                             "designation":  "Project Coordinator",
+                             "phone":  "+234 808 345 6789",
+                             "email":  "contact@org5.example.com"
+                         }]
+    },
+    {
+        "id":  "org-6",
+        "organization":  "Center for community health and development international",
+        "acronym":  "CHAD INT\u0027L",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "John John",
+                             "designation":  "Center manager",
+                             "email":  "chad.international@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Peter Okafor",
+                             "designation":  "Operations Manager",
+                             "phone":  "+234 810 567 8901",
+                             "email":  "contact@org6.example.com"
+                         }]
+    },
+    {
+        "id":  "org-7",
+        "organization":  "CENTRE FOR ADVOCACY,TRANSPARENCY AND ACCOUNTABILITY INITIATIVE",
+        "acronym":  "CATAI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "ABUBAKAR MUAZU",
+                             "designation":  "CEO",
+                             "email":  "sadiq@cataing.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Zainab Mohammed",
+                             "designation":  "Partnership Officer",
+                             "phone":  "+234 805 789 0123",
+                             "email":  "contact@org7.example.com"
+                         }]
+    },
+    {
+        "id":  "org-8",
+        "organization":  "Centre for Social Cohesion, Peace and Empowerment",
+        "acronym":  "CENSCOPE",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Abubakar Abdullahi",
+                             "designation":  "Executive Director",
+                             "email":  "censcope@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Daniel Adekunle",
+                             "designation":  "Senior Advisor",
+                             "phone":  "+234 811 901 2345",
+                             "email":  "contact@org8.example.com"
+                         }]
+    },
+    {
+        "id":  "org-9",
+        "organization":  "Child Protection and Peer Learning Initiative",
+        "acronym":  "CPPLI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Ashraf Tukur",
+                             "designation":  "Executive Director",
+                             "email":  "cppliinitiative1@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Sarah Uche",
+                             "designation":  "Communications Officer",
+                             "phone":  "+234 806 123 4567",
+                             "email":  "contact@org9.example.com"
+                         }]
+    },
+    {
+        "id":  "org-10",
+        "organization":  "Child Protection and Women Empowerment Initiative",
+        "acronym":  "CPWEI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Maryam Hassan Gambo",
+                             "designation":  "Executive Director",
+                             "email":  "cpwei17@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Aliyu Bashir",
+                             "designation":  "Deputy Coordinator",
+                             "phone":  "+234 802 345 6789",
+                             "email":  "contact@org10.example.com"
+                         }]
+    },
+    {
+        "id":  "org-11",
+        "organization":  "Civil Society Action Coalition on Education for All.",
+        "acronym":  "CSACEFA BORNO",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Ishaku Adamu",
+                             "designation":  "State Coordinator",
+                             "email":  "csacefaorgborno@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Hajiya Abubakar",
+                             "designation":  "Advocacy Officer",
+                             "phone":  "+234 809 567 8901",
+                             "email":  "contact@org11.example.com"
+                         }]
+    },
+    {
+        "id":  "org-12",
+        "organization":  "Concern on Climate Change for the Community Initiative",
+        "acronym":  "FOURCI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Gabriel Abraham Bala",
+                             "designation":  "Executive Director",
+                             "email":  "gabpoonen@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Babatunde Sola",
+                             "designation":  "Program Manager",
+                             "phone":  "+234 803 789 0123",
+                             "email":  "contact@org12.example.com"
+                         }]
+    },
+    {
+        "id":  "org-13",
+        "organization":  "Cosmic Nudge Empowerment Foundation",
+        "acronym":  "CNEF",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Adamu Audu",
+                             "designation":  "Monitoring and Evaluation Officer",
+                             "email":  "activity@cnefrelief.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Nneka Obi",
+                             "designation":  "Research Officer",
+                             "phone":  "+234 807 901 2345",
+                             "email":  "contact@org13.example.com"
+                         }]
+    },
+    {
+        "id":  "org-14",
+        "organization":  "El-Kanemi Memorial Foundation",
+        "acronym":  "EMF",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Abba Kyari Abatcha",
+                             "designation":  "Executive Director",
+                             "email":  "elkanemimf@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Muhammad Haruna",
+                             "designation":  "Executive Assistant",
+                             "phone":  "+234 810 123 4567",
+                             "email":  "contact@org14.example.com"
+                         }]
+    },
+    {
+        "id":  "org-15",
+        "organization":  "ENRICH GIRL CHILD OF THEIR RIGHT INITIATIVE",
+        "acronym":  "ENRICH-INITIATIVE",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Mohammed Bashir",
+                             "designation":  "Executive Director",
+                             "email":  "enrichinitiative@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Bukky Adedeji",
+                             "designation":  "Operations Coordinator",
+                             "phone":  "+234 805 234 5678",
+                             "email":  "contact@org15.example.com"
+                         }]
+    },
+    {
+        "id":  "org-16",
+        "organization":  "Future Resilience and Development Foundation",
+        "acronym":  "FRAD FOUNDATION",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Ishaku Balami",
+                             "designation":  "Program Coordinator",
+                             "email":  "iishaku25@fradfoundation.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Ahmed Sule",
+                             "designation":  "Monitoring Officer",
+                             "phone":  "+234 808 456 7890",
+                             "email":  "contact@org16.example.com"
+                         }]
+    },
+    {
+        "id":  "org-17",
+        "organization":  "Gender Equality Peace and Development Centre",
+        "acronym":  "GEPADC",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Pro. Patricia Donli",
+                             "designation":  "Executive Director",
+                             "email":  "podonli@yahoo.co.uk"
+                         }
+                     ,
+                         {
+                             "fullName":  "Victoria Chukwu",
+                             "designation":  "Gender Officer",
+                             "phone":  "+234 801 567 8901",
+                             "email":  "contact@org17.example.com"
+                         }]
+    },
+    {
+        "id":  "org-18",
+        "organization":  "Gibran Society",
+        "acronym":  "GBVS",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Rabi Mohammed",
+                             "designation":  "Executive Director",
+                             "email":  "rabinamohammad2@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Ibrahim Abdullahi",
+                             "designation":  "Field Coordinator",
+                             "phone":  "+234 809 678 9012",
+                             "email":  "contact@org18.example.com"
+                         }]
+    },
+    {
+        "id":  "org-19",
+        "organization":  "Global Village Healthcare Initiative for Africa",
+        "acronym":  "GHIV AFRICA",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Mulikat Bamidele",
+                             "designation":  "co-founder",
+                             "email":  "info@ghiv.org.ng"
+                         }
+                     ,
+                         {
+                             "fullName":  "Comfort Ezeoke",
+                             "designation":  "Healthcare Advocate",
+                             "phone":  "+234 806 789 0123",
+                             "email":  "contact@org19.example.com"
+                         }]
+    },
+    {
+        "id":  "org-20",
+        "organization":  "GOALPrime Organization Nigeria",
+        "acronym":  "GPON",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Ogbonna Uchenna",
+                             "designation":  "Response Coordinator",
+                             "email":  "country_director@goalprime.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Segun Adebayo",
+                             "designation":  "Logistics Manager",
+                             "phone":  "+234 811 890 1234",
+                             "email":  "contact@org20.example.com"
+                         }]
+    },
+    {
+        "id":  "org-21",
+        "organization":  "Hallmark Leadership Initiative",
+        "acronym":  "HALI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Muhammad Kabir",
+                             "designation":  "Program Manager",
+                             "email":  "mkabir@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Aisha Adamu",
+                             "designation":  "Youth Officer",
+                             "phone":  "+234 804 901 2345",
+                             "email":  "contact@org21.example.com"
+                         }]
+    },
+    {
+        "id":  "org-22",
+        "organization":  "Hope 360 Initiative for Peace",
+        "acronym":  "HOPE360",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "David Solomon",
+                             "designation":  "Executive Director",
+                             "email":  "hope360initiative@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Francis Okonkwo",
+                             "designation":  "Peacebuilder",
+                             "phone":  "+234 807 012 3456",
+                             "email":  "contact@org22.example.com"
+                         }]
+    },
+    {
+        "id":  "org-23",
+        "organization":  "Hope and Rural Aid Foundation",
+        "acronym":  "HARAF",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Jemima Dabo",
+                             "designation":  "Programme Manager",
+                             "email":  "dabojemima1@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Maryam Ahmed",
+                             "designation":  "Community Liaison",
+                             "phone":  "+234 810 234 5678",
+                             "email":  "contact@org23.example.com"
+                         }]
+    },
+    {
+        "id":  "org-24",
+        "organization":  "INTERCOMMUNITY FOR AFRICAN DEVELOPMENT INITIATIVE.",
+        "acronym":  "IADI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Abdulmalik ADAM KIDA",
+                             "designation":  "Executive Director.",
+                             "email":  "abdulkida19@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Chinedu Nwankwo",
+                             "designation":  "Strategic Advisor",
+                             "phone":  "+234 805 345 6789",
+                             "email":  "contact@org24.example.com"
+                         }]
+    },
+    {
+        "id":  "org-25",
+        "organization":  "International Rescue Committee",
+        "acronym":  "IRC",
+        "organizationType":  "INGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Edward Ishaku",
+                             "designation":  "Education manager",
+                             "email":  "edward.ishaku@rescue.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Rebecca Walsh",
+                             "designation":  "Senior Advisor",
+                             "phone":  "+234 802 456 7890",
+                             "email":  "contact@org25.example.com"
+                         }]
+    },
+    {
+        "id":  "org-26",
+        "organization":  "IYWAEC",
+        "acronym":  "IWAYEC",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "afiniki Mamza",
+                             "designation":  "ED",
+                             "email":  "afiniki@iwayec.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Godwin Okafor",
+                             "designation":  "Program Director",
+                             "phone":  "+234 809 567 8901",
+                             "email":  "contact@org26.example.com"
+                         }]
+    },
+    {
+        "id":  "org-27",
+        "organization":  "Jireh Doo Foundation",
+        "acronym":  "JDF",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Kingsley Okpabi",
+                             "designation":  "Program Manager |Head of office North East",
+                             "email":  "kokpabi@jirehdoo.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Luisa Santos",
+                             "designation":  "Partnership Manager",
+                             "phone":  "+234 806 678 9012",
+                             "email":  "contact@org27.example.com"
+                         }]
+    },
+    {
+        "id":  "org-28",
+        "organization":  "Life at Best Development Initiative",
+        "acronym":  "LABI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Ayuba Irmiya",
+                             "designation":  "Program Officer",
+                             "email":  "ayuba@labinigeria.org.ng"
+                         }
+                     ,
+                         {
+                             "fullName":  "Bartholomew Ikechukwu",
+                             "designation":  "Finance Officer",
+                             "phone":  "+234 811 789 0123",
+                             "email":  "contact@org28.example.com"
+                         }]
+    },
+    {
+        "id":  "org-29",
+        "organization":  "Mercy Sarah Foundation",
+        "acronym":  "MSF",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Sarah Danjuma",
+                             "designation":  "Chief Executive",
+                             "email":  "info@mercysarah.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Kadiatu Diallo",
+                             "designation":  "Programs Officer",
+                             "phone":  "+234 803 890 1234",
+                             "email":  "contact@org29.example.com"
+                         }]
+    },
+    {
+        "id":  "org-30",
+        "organization":  "MUJIB HOPE FOUNDATION",
+        "acronym":  "MHF",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Muniratu Jibrin",
+                             "designation":  "Executive Director",
+                             "email":  "mujibhopefoundation@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Emmanuel Audu",
+                             "designation":  "Deputy Director",
+                             "phone":  "+234 808 901 2345",
+                             "email":  "contact@org30.example.com"
+                         }]
+    },
+    {
+        "id":  "org-31",
+        "organization":  "Multi Aid and Charity Initiative",
+        "acronym":  "MACI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Maryam Gimba",
+                             "designation":  "Executive Director",
+                             "email":  "multiaidandcharityinitiative@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Sandra Ogunlade",
+                             "designation":  "Monitoring Officer",
+                             "phone":  "+234 807 012 3456",
+                             "email":  "contact@org31.example.com"
+                         }]
+    },
+    {
+        "id":  "org-32",
+        "organization":  "Nkafamiya Rescue Mission",
+        "acronym":  "NRM",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Irmiya Ayuba Vandi",
+                             "designation":  "Chief of Operations",
+                             "email":  "info@nrmission.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Abdullahi Shehu",
+                             "designation":  "Response Manager",
+                             "phone":  "+234 810 123 4567",
+                             "email":  "contact@org32.example.com"
+                         }]
+    },
+    {
+        "id":  "org-33",
+        "organization":  "Norwegian Refugee Council",
+        "acronym":  "NRC",
+        "organizationType":  "INGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Ronald Odero",
+                             "designation":  "Education Specialist",
+                             "email":  "ronald.odero@nrc.no"
+                         }
+                     ,
+                         {
+                             "fullName":  "Sofia Martinez",
+                             "designation":  "Program Officer",
+                             "phone":  "+234 805 234 5678",
+                             "email":  "contact@org33.example.com"
+                         }]
+    },
+    {
+        "id":  "org-34",
+        "organization":  "NOVEL ALLIANCE FOR DEVELOPMENT AID",
+        "acronym":  "NADA",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "AMOS DAUDA",
+                             "designation":  "CP PROJECT OFFICER",
+                             "email":  "adevelopmentaid@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Prosper Okoro",
+                             "designation":  "Development Officer",
+                             "phone":  "+234 809 345 6789",
+                             "email":  "contact@org34.example.com"
+                         }]
+    },
+    {
+        "id":  "org-35",
+        "organization":  "Plan International Nigeria",
+        "acronym":  "PLAN",
+        "organizationType":  "INGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Samuel Mamza",
+                             "designation":  "Education Specialist",
+                             "email":  "samuel.mamza@plan-international.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Margaret Osei",
+                             "designation":  "Education Manager",
+                             "phone":  "+234 806 456 7890",
+                             "email":  "contact@org35.example.com"
+                         }]
+    },
+    {
+        "id":  "org-36",
+        "organization":  "Restoration of Hope Initiative",
+        "acronym":  "ROHI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Desmond Peter",
+                             "designation":  "Programs Manager",
+                             "email":  "desmondpeter@restorationofhopeinitiative.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Jonathan Ekpo",
+                             "designation":  "Hope Manager",
+                             "phone":  "+234 812 567 8901",
+                             "email":  "contact@org36.example.com"
+                         }]
+    },
+    {
+        "id":  "org-37",
+        "organization":  "RISE TO INSPIRE AFRICA INITIATIVE",
+        "acronym":  "RIA INITIATIVE",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Stephen Olushola Oladepo",
+                             "designation":  "DIRECTOR OF PROGRAMME",
+                             "email":  "ria.initiative@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Naomi Adewale",
+                             "designation":  "Inspiration Lead",
+                             "phone":  "+234 804 678 9012",
+                             "email":  "contact@org37.example.com"
+                         }]
+    },
+    {
+        "id":  "org-38",
+        "organization":  "Save the Children International",
+        "acronym":  "SCI",
+        "organizationType":  "INGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Musa Ikuwuta Badar",
+                             "designation":  "ACPM LEARN/EIEWG Co-Lead",
+                             "email":  "ikuwuta.badar@savethechildren.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Thomas Okafor",
+                             "designation":  "Education Coordinator",
+                             "phone":  "+234 808 789 0123",
+                             "email":  "contact@org38.example.com"
+                         }]
+    },
+    {
+        "id":  "org-39",
+        "organization":  "Save The Slum Initiative",
+        "acronym":  "STSI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Owa Samuel Adeyinka",
+                             "designation":  "Executive Director",
+                             "email":  "savethesluminitiative@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Precious Adebayo",
+                             "designation":  "Program Officer",
+                             "phone":  "+234 807 890 1234",
+                             "email":  "contact@org39.example.com"
+                         }]
+    },
+    {
+        "id":  "org-40",
+        "organization":  "SIRRI CARE FOUNDATION",
+        "acronym":  "SIRRI CARE",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "LUCY TYONENGE",
+                             "designation":  "EDUCATION OFFICER",
+                             "email":  "info@sirricare.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Rasheed Gadi",
+                             "designation":  "Care Officer",
+                             "phone":  "+234 811 901 2345",
+                             "email":  "contact@org40.example.com"
+                         }]
+    },
+    {
+        "id":  "org-41",
+        "organization":  "Street Child",
+        "acronym":  "SCON",
+        "organizationType":  "INGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Firrichi Elam",
+                             "designation":  "Emergency response manager",
+                             "email":  "firrichi.elam@street-child.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Jennifer Brown",
+                             "designation":  "Response Officer",
+                             "phone":  "+234 805 012 3456",
+                             "email":  "contact@org41.example.com"
+                         }]
+    },
+    {
+        "id":  "org-42",
+        "organization":  "Sustainable Development for Community Base Initiative",
+        "acronym":  "SDCBI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Mohammed Shettima",
+                             "designation":  "Executive Director",
+                             "email":  "sdcbi.org@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Hassan Mohammed",
+                             "designation":  "Development Officer",
+                             "phone":  "+234 810 123 4567",
+                             "email":  "contact@org42.example.com"
+                         }]
+    },
+    {
+        "id":  "org-43",
+        "organization":  "Taimako Community Development Initiative",
+        "acronym":  "TCDI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Gambo Garba Muhammad",
+                             "designation":  "Executive Director",
+                             "email":  "gambogm@taimakocdi.org.ng"
+                         }
+                     ,
+                         {
+                             "fullName":  "Stella Okafor",
+                             "designation":  "Community Officer",
+                             "phone":  "+234 806 234 5678",
+                             "email":  "contact@org43.example.com"
+                         }]
+    },
+    {
+        "id":  "org-44",
+        "organization":  "The Big Smile Foundation",
+        "acronym":  "TBSF",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Anthonia Obi",
+                             "designation":  "Executive Director",
+                             "email":  "anthonia@thebigsmile.org.ng"
+                         }
+                     ,
+                         {
+                             "fullName":  "Ekene Uche",
+                             "designation":  "Smile Ambassador",
+                             "phone":  "+234 809 345 6789",
+                             "email":  "contact@org44.example.com"
+                         }]
+    },
+    {
+        "id":  "org-45",
+        "organization":  "TPO",
+        "acronym":  "TPO",
+        "organizationType":  "INGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Abubakar Conteh",
+                             "designation":  "Education Coordinator",
+                             "email":  "acoteh@tpordc.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Lamin Jallow",
+                             "designation":  "Program Specialist",
+                             "phone":  "+234 803 456 7890",
+                             "email":  "contact@org45.example.com"
+                         }]
+    },
+    {
+        "id":  "org-46",
+        "organization":  "United Nations Children\u0027s Fund",
+        "acronym":  "UNICEF",
+        "organizationType":  "UN",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Caroline Waruguru Mwai",
+                             "designation":  "Education Manager",
+                             "email":  "cmwai@unicef.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Idris Yusuf",
+                             "designation":  "Program Officer",
+                             "phone":  "+234 808 567 8901",
+                             "email":  "contact@org46.example.com"
+                         }]
+    },
+    {
+        "id":  "org-47",
+        "organization":  "United Nations Office for the Coordination of Humanitarian Affairs",
+        "acronym":  "UNOCHA",
+        "organizationType":  "UN",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Esty Sutyoko",
+                             "designation":  "Inter-Sector Coordination Coordinator",
+                             "email":  "sutyoko@un.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Kofi Mensah",
+                             "designation":  "Coordination Specialist",
+                             "phone":  "+234 807 678 9012",
+                             "email":  "contact@org47.example.com"
+                         }]
+    },
+    {
+        "id":  "org-48",
+        "organization":  "World Food Programme (WFP)",
+        "acronym":  "WFP",
+        "organizationType":  "UN",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Agnes Mungatia",
+                             "designation":  "Head of Capacity Strengthening and Policy Coherence",
+                             "email":  "adaku.ekpo@wfp.org"
+                         }
+                     ,
+                         {
+                             "fullName":  "Juliana Costa",
+                             "designation":  "Program Manager",
+                             "phone":  "+234 810 789 0123",
+                             "email":  "contact@org48.example.com"
+                         }]
+    },
+    {
+        "id":  "org-49",
+        "organization":  "Yerwa Empowerment Foundation",
+        "acronym":  "YEF",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Ali Kura",
+                             "designation":  "Operation Manager",
+                             "email":  "alico247@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Patrick Aminu",
+                             "designation":  "Coordination Officer",
+                             "phone":  "+234 805 890 1234",
+                             "email":  "contact@org49.example.com"
+                         }]
+    },
+    {
+        "id":  "org-50",
+        "organization":  "Yobe Peace and Community Development Initiative(YOPCODI)",
+        "acronym":  "YOPCODI",
+        "organizationType":  "NNGO",
+        "contactCount":  2,
+        "contacts":  [
+                         {
+                             "fullName":  "Alhaji Baba Shehu",
+                             "designation":  "Chairman, Board of Trustees",
+                             "email":  "yobepeace@gmail.com"
+                         }
+                     ,
+                         {
+                             "fullName":  "Halima Usman",
+                             "designation":  "Development Officer",
+                             "phone":  "+234 811 901 2345",
+                             "email":  "contact@org50.example.com"
+                         }]
+    }
+];
+
+    const orgList = document.getElementById("orgList");
+    const searchInput = document.getElementById("searchInput");
+    const memberFilters = document.getElementById("memberFilters");
+    const memberButtons = [...memberFilters.querySelectorAll(".member-btn[data-member-filter]")];
+    const typeFilterBtn = document.getElementById("typeFilterBtn");
+    const importBtn = document.getElementById("importBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const loginBtn = document.getElementById("loginBtn");
+    const importInput = document.getElementById("importInput");
+    const adminPanel = document.getElementById("adminPanel");
+    const adminEmailInput = document.getElementById("adminEmail");
+    const adminPasswordInput = document.getElementById("adminPassword");
+    const adminLoginBtn = document.getElementById("adminLoginBtn");
+    const adminCancelBtn = document.getElementById("adminCancelBtn");
+    const adminStatus = document.getElementById("adminStatus");
+    const loginStatus = document.getElementById("loginStatus");
+
+    let filtered = [...organizations];
+    let openId = null;
+    let membershipFilter = "all";
+    let organizationTypeFilter = "all";
+    let organizationTypes = [];
+    let pendingSecureAction = "";
+    let currentLoggedInUser = ""; // Tracks currently logged-in user email
+    const authorizedEmail = "chisom@lcpd.org.ng";
+    const authorizedPassword = "EiEgit@";
+
+    const escapeHtml = (value) => String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
+    function textValue(value) {
+      return String(value || "").trim();
+    }
+
+    function rebuildOrganizationTypes() {
+      organizationTypes = [...new Set(
+        organizations
+          .map((org) => `${org.organizationType || ""}`.trim())
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b));
+
+      const currentTypeExists = organizationTypes.some(
+        (type) => type.toUpperCase() === organizationTypeFilter.toUpperCase()
+      );
+
+      if (organizationTypeFilter !== "all" && !currentTypeExists) {
+        organizationTypeFilter = "all";
+      }
+    }
+
+    function openAdminPanel() {
+      adminPanel.hidden = false;
+      adminPasswordInput.value = "";
+      setAdminStatus("Enter admin credentials to view full contact details.", false);
+      if (!textValue(adminEmailInput.value)) {
+        adminEmailInput.value = authorizedEmail;
+      }
+      adminEmailInput.focus();
+    }
+
+    function closeAdminPanel(resetStatus = false) {
+      adminPanel.hidden = true;
+      adminPasswordInput.value = "";
+      if (resetStatus) {
+        setAdminStatus("Enter admin credentials to view full contact details.", false);
+      }
+    }
+
+    function setAdminStatus(message, isError = false) {
+      adminStatus.textContent = message;
+      adminStatus.classList.toggle("error", isError);
+      adminStatus.classList.toggle("ok", !isError);
+    }
+
+    function updateLoginStatus() {
+      if (currentLoggedInUser === authorizedEmail) {
+        loginStatus.className = "login-status logged-in";
+        loginStatus.innerHTML = `
+          <span class="login-status-text">✓ Logged in as: ${escapeHtml(currentLoggedInUser)} (admin)</span>
+          <button type="button" class="logout-btn" id="logoutBtn">Logout</button>
+        `;
+        importBtn.hidden = false;
+        exportBtn.hidden = false;
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", () => {
+            currentLoggedInUser = "";
+            updateLoginStatus();
+            renderList();
+          });
+        }
+      } else {
+        loginStatus.className = "login-status guest";
+        loginStatus.innerHTML = `<span class="login-status-text">Logged in as: Guest (limited view)</span>`;
+        importBtn.hidden = true;
+        exportBtn.hidden = true;
+      }
+    }
+
+    function performAdminLogin() {
+      const email = textValue(adminEmailInput.value).toLowerCase();
+      const password = textValue(adminPasswordInput.value);
+
+      if (!email || !password) {
+        setAdminStatus("Enter both email and password to login.", true);
+        return;
+      }
+
+      const emailMatches = email === authorizedEmail.toLowerCase();
+      const passwordMatches = password === authorizedPassword
+        || password.toLowerCase() === authorizedPassword.toLowerCase();
+
+      if (!emailMatches || !passwordMatches) {
+        setAdminStatus("Access denied. Email or password is incorrect.", true);
+        return;
+      }
+
+      currentLoggedInUser = email;
+      setAdminStatus("✓ Login successful! You now have admin access.");
+      setTimeout(() => {
+        closeAdminPanel(false);
+        updateLoginStatus();
+        renderList();
+      }, 800);
+    }
+
+    function normalizeImportedOrganizations(source) {
+      return source
+        .map((org, index) => {
+          const orgName = textValue(org.organization || org.organizationName || org.name);
+          const orgType = textValue(org.organizationType || org.type).toUpperCase();
+          const contactsSource = Array.isArray(org.contacts) ? org.contacts : [];
+
+          const contacts = contactsSource
+            .map((contact) => {
+              const fallbackName = `${textValue(contact.firstName)} ${textValue(contact.lastName)}`.trim();
+              const fullName = textValue(contact.fullName || contact.name || fallbackName || "N/A");
+              return {
+                fullName,
+                designation: textValue(contact.designation || contact.title || "N/A"),
+                email: textValue(contact.email).toLowerCase(),
+                phone: textValue(contact.phone || contact.phone_number || "")
+              };
+            })
+            .filter((contact) => contact.fullName || contact.designation || contact.email);
+
+          return {
+            id: `org-${index + 1}`,
+            organization: orgName,
+            acronym: textValue(org.acronym),
+            organizationType: orgType,
+            membership: textValue(org.membership).toLowerCase(),
+            contactCount: contacts.length,
+            contacts
+          };
+        })
+        .filter((org) => org.organization);
+    }
+
+    function getFieldValue(row, fieldNames) {
+      const entries = Object.entries(row || {});
+      for (const name of fieldNames) {
+        const expected = name.toLowerCase();
+        const match = entries.find(([key]) => textValue(key).toLowerCase() === expected);
+        if (match) {
+          return textValue(match[1]);
+        }
+      }
+
+      return "";
+    }
+
+    function getMembershipFromSheetName(sheetName) {
+      const value = textValue(sheetName).toLowerCase();
+      if (value.includes("full")) {
+        return "full";
+      }
+      if (value.includes("associate")) {
+        return "associate";
+      }
+      if (value.includes("observer") || value.includes("oberserver")) {
+        return "observer";
+      }
+      return "";
+    }
+
+    function getSheetImportPriority(sheetName) {
+      const value = textValue(sheetName).toLowerCase();
+      if (value === "all members") {
+        return 1;
+      }
+      if (value.includes("full") || value.includes("associate") || value.includes("observer") || value.includes("oberserver")) {
+        return 3;
+      }
+      return 2;
+    }
+
+    function normalizeFlatContactRow(row, fallbackMembership, sourcePriority = 1) {
+      const firstName = getFieldValue(row, ["first name", "firstname"]);
+      const lastName = getFieldValue(row, ["last name", "lastname"]);
+      const fullNameFromRow = getFieldValue(row, ["full name", "contact name", "name"]);
+      const fullName = textValue(fullNameFromRow || `${firstName} ${lastName}`.trim() || "N/A");
+
+      return {
+        organization: getFieldValue(row, ["organization full name", "organization", "organisation full name", "organisation"]),
+        acronym: getFieldValue(row, ["acronym"]),
+        organizationType: getFieldValue(row, ["organization type", "type", "organisation type"]).toUpperCase(),
+        membership: (getFieldValue(row, ["membership", "member category"]) || fallbackMembership || "").toLowerCase(),
+        fullName,
+        designation: getFieldValue(row, ["designation", "title", "position"]) || "N/A",
+        email: getFieldValue(row, ["email", "mail"]).toLowerCase(),
+        phone: getFieldValue(row, ["phone", "phone number", "mobile", "telephone"]),
+        sourcePriority
+      };
+    }
+
+    function buildOrganizationsFromFlatRows(flatRows) {
+      const grouped = new Map();
+
+      flatRows.forEach((row) => {
+        const orgName = textValue(row.organization);
+        if (!orgName) {
+          return;
+        }
+
+        const key = `${orgName}||${textValue(row.acronym)}||${textValue(row.organizationType)}`;
+        if (!grouped.has(key)) {
+          grouped.set(key, {
+            organization: orgName,
+            acronym: textValue(row.acronym),
+            organizationType: textValue(row.organizationType).toUpperCase(),
+            membership: textValue(row.membership).toLowerCase(),
+            membershipPriority: Number(row.sourcePriority) || 1,
+            contactMap: new Map()
+          });
+        }
+
+        const target = grouped.get(key);
+        const rowPriority = Number(row.sourcePriority) || 1;
+        if (row.membership && (!target.membership || rowPriority >= target.membershipPriority)) {
+          target.membership = textValue(row.membership).toLowerCase();
+          target.membershipPriority = rowPriority;
+        }
+
+        const contact = {
+          fullName: textValue(row.fullName) || "N/A",
+          designation: textValue(row.designation) || "N/A",
+          email: textValue(row.email).toLowerCase(),
+          phone: textValue(row.phone),
+          sourcePriority: rowPriority
+        };
+
+        const contactKey = contact.email
+          ? `email:${contact.email}`
+          : `name:${contact.fullName.toLowerCase()}`;
+
+        const existingContact = target.contactMap.get(contactKey);
+        if (!existingContact || contact.sourcePriority >= existingContact.sourcePriority) {
+          target.contactMap.set(contactKey, contact);
+        }
+      });
+
+      return [...grouped.values()]
+        .sort((a, b) => a.organization.localeCompare(b.organization))
+        .map((org, index) => {
+          const contacts = [...org.contactMap.values()]
+            .sort((a, b) => a.fullName.localeCompare(b.fullName))
+            .map(({ sourcePriority, ...contact }) => contact);
+
+          return {
+            id: `org-${index + 1}`,
+            organization: org.organization,
+            acronym: org.acronym,
+            organizationType: org.organizationType,
+            membership: org.membership,
+            contactCount: contacts.length,
+            contacts
+          };
+        });
+    }
+
+    function buildFlatRowsFromOrganizations() {
+      const rows = [];
+      organizations.forEach((org) => {
+        const memberGroup = getMembershipGroup(org);
+        const membershipLabel = memberGroup === "full"
+          ? "Full members"
+          : memberGroup === "associate"
+            ? "Associate members"
+            : memberGroup === "observer"
+              ? "Oberserver members"
+              : "";
+
+        org.contacts.forEach((contact) => {
+          const parts = textValue(contact.fullName).split(/\s+/).filter(Boolean);
+          const firstName = parts.length ? parts[0] : "";
+          const lastName = parts.length > 1 ? parts.slice(1).join(" ") : "";
+
+          rows.push({
+            "First name": firstName,
+            "Last name": lastName,
+            "Full name": textValue(contact.fullName),
+            "Organization full name": textValue(org.organization),
+            "Acronym": textValue(org.acronym),
+            "Organization type": textValue(org.organizationType).toUpperCase(),
+            "Membership": membershipLabel,
+            "Designation": textValue(contact.designation),
+            "Phone": textValue(contact.phone),
+            "Email": textValue(contact.email).toLowerCase()
+          });
+        });
+      });
+
+      return rows;
+    }
+
+    function buildWorksheet(rows, headers) {
+      const normalized = rows.map((row) => {
+        const output = {};
+        headers.forEach((header) => {
+          output[header] = textValue(row[header]);
+        });
+        return output;
+      });
+
+      return XLSX.utils.json_to_sheet(normalized, {
+        header: headers,
+        skipHeader: false
+      });
+    }
+
+    function applyImportedOrganizations(imported) {
+      organizations = Array.isArray(imported) ? imported : [];
+      filtered = [];
+      openId = null;
+      membershipFilter = "all";
+      organizationTypeFilter = "all";
+      searchInput.value = "";
+      rebuildOrganizationTypes();
+      applySearch();
+    }
+
+    function exportOrganizations() {
+      if (typeof XLSX === "undefined") {
+        const payload = {
+          exportedAt: new Date().toISOString(),
+          organizationCount: organizations.length,
+          organizations
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const stamp = new Date().toISOString().replace(/[.:]/g, "-");
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `organization-directory-${stamp}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      const headers = [
+        "First name",
+        "Last name",
+        "Full name",
+        "Organization full name",
+        "Acronym",
+        "Organization type",
+        "Membership",
+        "Designation",
+        "Phone",
+        "Email"
+      ];
+
+      const allRows = buildFlatRowsFromOrganizations();
+      const fullRows = allRows.filter((row) => textValue(row.Membership).toLowerCase().includes("full"));
+      const associateRows = allRows.filter((row) => textValue(row.Membership).toLowerCase().includes("associate"));
+      const observerRows = allRows.filter((row) => {
+        const value = textValue(row.Membership).toLowerCase();
+        return value.includes("observer") || value.includes("oberserver");
+      });
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, buildWorksheet(fullRows, headers), "Full members");
+      XLSX.utils.book_append_sheet(workbook, buildWorksheet(associateRows, headers), "Associate members");
+      XLSX.utils.book_append_sheet(workbook, buildWorksheet(observerRows, headers), "Oberserver members");
+      XLSX.utils.book_append_sheet(workbook, buildWorksheet(allRows, headers), "All members");
+
+      const stamp = new Date().toISOString().replace(/[.:]/g, "-");
+      XLSX.writeFile(workbook, `Contact list.current.${stamp}.xlsx`);
+    }
+
+    function importOrganizationsFromFile(file) {
+      const lowerName = textValue(file.name).toLowerCase();
+      const isJson = lowerName.endsWith(".json");
+
+      if (isJson) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(String(reader.result || "{}"));
+            const source = Array.isArray(parsed) ? parsed : (parsed && parsed.organizations);
+
+            if (!Array.isArray(source)) {
+              throw new Error("JSON file must contain an array or an organizations property.");
+            }
+
+            const imported = normalizeImportedOrganizations(source);
+            applyImportedOrganizations(imported);
+            if (organizations.length) {
+              alert(`Import successful. ${organizations.length} organizations loaded.`);
+            } else {
+              alert("Import complete. The imported file has no organization rows, so the current list is now empty.");
+            }
+          } catch (error) {
+            alert(`Import failed: ${error.message}`);
+          } finally {
+            importInput.value = "";
+          }
+        };
+
+        reader.readAsText(file);
+        return;
+      }
+
+      if (typeof XLSX === "undefined") {
+        alert("Excel import is unavailable because the local workbook library was not loaded.");
+        importInput.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const workbook = XLSX.read(reader.result, { type: "array" });
+          const sheetNames = workbook.SheetNames || [];
+
+          if (!sheetNames.length) {
+            throw new Error("Imported workbook has no sheets.");
+          }
+
+          const categorySheets = sheetNames.filter((sheetName) => {
+            const lower = textValue(sheetName).toLowerCase();
+            return lower.includes("full")
+              || lower.includes("associate")
+              || lower.includes("observer")
+              || lower.includes("oberserver");
+          });
+
+          const allMembersSheet = sheetNames.find((sheetName) => textValue(sheetName).toLowerCase() === "all members");
+
+          let targetSheets = [];
+          if (categorySheets.length) {
+            targetSheets = categorySheets;
+          } else if (allMembersSheet) {
+            targetSheets = [allMembersSheet];
+          } else {
+            targetSheets = [...sheetNames];
+          }
+
+          targetSheets = targetSheets.sort((a, b) => getSheetImportPriority(a) - getSheetImportPriority(b));
+
+          const flatRows = [];
+          const importSheetStats = [];
+          targetSheets.forEach((sheetName) => {
+            const worksheet = workbook.Sheets[sheetName];
+            if (!worksheet) {
+              return;
+            }
+
+            const fallbackMembership = getMembershipFromSheetName(sheetName);
+            const sourcePriority = getSheetImportPriority(sheetName);
+            const rows = XLSX.utils.sheet_to_json(worksheet, { defval: "", raw: false });
+            let acceptedRows = 0;
+            rows.forEach((row) => {
+              const normalized = normalizeFlatContactRow(row, fallbackMembership, sourcePriority);
+              if (normalized.organization) {
+                flatRows.push(normalized);
+                acceptedRows++;
+              }
+            });
+
+            importSheetStats.push(`${sheetName}: ${acceptedRows}`);
+          });
+
+          const imported = buildOrganizationsFromFlatRows(flatRows);
+          applyImportedOrganizations(imported);
+          if (organizations.length) {
+            alert(`Import successful. ${organizations.length} organizations loaded from workbook.\nSheets used: ${importSheetStats.join(" | ")}`);
+          } else {
+            alert("Import complete. The imported workbook has no organization rows, so the current list is now empty.");
+          }
+        } catch (error) {
+          alert(`Import failed: ${error.message}`);
+        } finally {
+          importInput.value = "";
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    function getMembershipGroup(org) {
+      const rawMembership = `${org.membership || ""}`.trim().toLowerCase();
+      const rawType = `${org.organizationType || ""}`.trim().toUpperCase();
+
+      if (rawMembership.includes("full")) {
+        return "full";
+      }
+      if (rawMembership.includes("associate")) {
+        return "associate";
+      }
+      if (rawMembership.includes("observer") || rawMembership.includes("oberserver")) {
+        return "observer";
+      }
+
+      if (rawType === "NNGO") {
+        return "full";
+      }
+      if (rawType === "INGO") {
+        return "associate";
+      }
+      if (rawType === "UN") {
+        return "observer";
+      }
+
+      return "all";
+    }
+
+    function setActiveMemberButton() {
+      memberButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.memberFilter === membershipFilter);
+      });
+    }
+
+    function setTypeFilterButton() {
+      const isAll = organizationTypeFilter === "all";
+      typeFilterBtn.textContent = isAll
+        ? "Organization type: All"
+        : `Organization type: ${organizationTypeFilter}`;
+      typeFilterBtn.classList.toggle("type-active", !isAll);
+    }
+
+    function moveToNextOrganizationType() {
+      if (!organizationTypes.length) {
+        organizationTypeFilter = "all";
+        return;
+      }
+
+      if (organizationTypeFilter === "all") {
+        organizationTypeFilter = organizationTypes[0];
+        return;
+      }
+
+      const currentIndex = organizationTypes.findIndex(
+        (type) => type.toUpperCase() === organizationTypeFilter.toUpperCase()
+      );
+
+      if (currentIndex === -1 || currentIndex === organizationTypes.length - 1) {
+        organizationTypeFilter = "all";
+      } else {
+        organizationTypeFilter = organizationTypes[currentIndex + 1];
+      }
+    }
+
+    function buildRows(contacts) {
+      const isAdmin = currentLoggedInUser === authorizedEmail;
+      
+      return contacts.map((contact) => {
+        // Conditionally show email and phone only to admin
+        const emailDisplay = isAdmin && contact.email
+          ? `<a href="mailto:${escapeHtml(contact.email)}">${escapeHtml(contact.email)}</a>`
+          : isAdmin ? "-" : "***";
+        
+        const phoneDisplay = isAdmin && contact.phone
+          ? `<a href="tel:${escapeHtml(contact.phone)}">${escapeHtml(contact.phone)}</a>`
+          : isAdmin ? "-" : "***";
+
+        return `
+          <tr>
+            <td>${escapeHtml(contact.fullName)}</td>
+            <td>${escapeHtml(contact.designation)}</td>
+            <td>${phoneDisplay}</td>
+            <td>${emailDisplay}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderList() {
+      if (!filtered.length) {
+        orgList.innerHTML = '<div class="no-results">No organizations match this search.</div>';
+        return;
+      }
+
+      orgList.innerHTML = "";
+
+      filtered.forEach((org, index) => {
+        const card = document.createElement("article");
+        const isOpen = org.id === openId;
+        card.className = `org-item${isOpen ? " active" : ""}`;
+        card.style.animationDelay = `${Math.min(index * 22, 220)}ms`;
+
+        const rows = buildRows(org.contacts);
+        card.innerHTML = `
+          <button type="button" class="org-trigger" aria-expanded="${isOpen}">
+            <div>
+              <div class="org-title">${escapeHtml(org.organization)}</div>
+              <div class="org-meta">${escapeHtml(org.organizationType || "Type not set")} • ${org.contactCount} contact${org.contactCount === 1 ? "" : "s"}</div>
+            </div>
+            <span class="org-chevron${isOpen ? " open" : ""}">▾</span>
+          </button>
+
+          <div class="org-details${isOpen ? " open" : ""}">
+            <div class="chips">
+              <div class="chip">Acronym: ${escapeHtml(org.acronym || "N/A")}</div>
+              <div class="chip">Type: ${escapeHtml(org.organizationType || "N/A")}</div>
+              <div class="chip">Contacts: ${org.contactCount}</div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Contact Name</th>
+                    <th>Designation</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows || '<tr><td colspan="4">No contacts available.</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+
+        const trigger = card.querySelector(".org-trigger");
+        trigger.addEventListener("click", () => {
+          openId = openId === org.id ? null : org.id;
+          renderList();
+        });
+
+        orgList.appendChild(card);
+      });
+    }
+
+    function applySearch() {
+      const query = searchInput.value.trim().toLowerCase();
+      filtered = organizations.filter((org) => {
+        const text = `${org.organization} ${org.acronym || ""} ${org.organizationType || ""}`.toLowerCase();
+        const matchesSearch = text.includes(query);
+        const matchesMembership = membershipFilter === "all" || getMembershipGroup(org) === membershipFilter;
+        const matchesType = organizationTypeFilter === "all"
+          || `${org.organizationType || ""}`.trim().toUpperCase() === organizationTypeFilter.toUpperCase();
+        return matchesSearch && matchesMembership && matchesType;
+      });
+
+      if (!filtered.some((org) => org.id === openId)) {
+        openId = null;
+      }
+
+      setActiveMemberButton();
+      setTypeFilterButton();
+      renderList();
+    }
+
+    memberButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        membershipFilter = button.dataset.memberFilter || "all";
+        applySearch();
+      });
+    });
+
+    typeFilterBtn.addEventListener("click", () => {
+      moveToNextOrganizationType();
+      applySearch();
+    });
+
+    importBtn.addEventListener("click", () => {
+      importInput.click();
+    });
+
+    exportBtn.addEventListener("click", () => {
+      exportOrganizations();
+    });
+
+    loginBtn.addEventListener("click", () => {
+      openAdminPanel();
+    });
+
+    adminLoginBtn.addEventListener("click", () => {
+      performAdminLogin();
+    });
+
+    adminCancelBtn.addEventListener("click", () => {
+      closeAdminPanel(true);
+    });
+
+    importInput.addEventListener("change", (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) {
+        return;
+      }
+
+      importOrganizationsFromFile(file);
+    });
+
+    adminPasswordInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        performAdminLogin();
+      }
+    });
+
+    searchInput.addEventListener("input", applySearch);
+
+    rebuildOrganizationTypes();
+    setActiveMemberButton();
+    setTypeFilterButton();
+    updateLoginStatus();
+    renderList();
+  </script>
+</body>
+</html>
