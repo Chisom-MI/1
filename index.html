@@ -1,0 +1,1390 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Organization Directory</title>
+  <style>
+    :root {
+      --bg: #f5f8fd;
+      --panel: #ffffff;
+      --ink: #0d2340;
+      --muted: #5f7391;
+      --line: #d8e3f2;
+      --primary: #1f66c2;
+      --primary-strong: #1254aa;
+      --chip: #edf4ff;
+      --soft: #f7fbff;
+      --danger: #b83d3d;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Calibri, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      padding: 10px;
+    }
+
+    .shell {
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 12px 28px rgba(20, 49, 90, 0.08);
+      overflow: hidden;
+      animation: rise 350ms ease-out;
+    }
+
+    .hero {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brand-logo {
+      width: 240px;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      background: #fff;
+    }
+
+    .brand-text {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .kicker {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.55rem;
+      line-height: 1.12;
+      font-weight: 700;
+    }
+
+    .subtext {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .member-filters,
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 10px;
+    }
+
+    .member-btn {
+      border: 1px solid var(--primary);
+      background: var(--primary);
+      color: #fff;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease, transform 120ms ease;
+    }
+
+    .member-btn:hover {
+      transform: translateY(-1px);
+      background: var(--primary-strong);
+      border-color: var(--primary-strong);
+    }
+
+    .member-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(31, 102, 194, 0.22);
+    }
+
+    .member-btn.active {
+      background: #0d4e9e;
+      border-color: #0d4e9e;
+    }
+
+    .member-btn.type-active {
+      background: #0b3f80;
+      border-color: #0b3f80;
+    }
+
+    .action-btn {
+      background: #2b74d1;
+      border-color: #2b74d1;
+    }
+
+    .auth-panel {
+      margin: 0 0 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--soft);
+    }
+
+    .auth-panel[hidden] {
+      display: none !important;
+    }
+
+    .auth-row {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(2, minmax(160px, 1fr));
+      margin: 0;
+    }
+
+    .auth-action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .auth-input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.88rem;
+    }
+
+    .auth-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(31, 102, 194, 0.16);
+    }
+
+    .auth-status {
+      font-size: 0.8rem;
+      margin: 7px 0 0;
+      color: var(--muted);
+      min-height: 1.1em;
+    }
+
+    .auth-status.ok {
+      color: #1b5f12;
+    }
+
+    .auth-status.error {
+      color: var(--danger);
+    }
+
+    .login-status {
+      font-size: 0.88rem;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: var(--chip);
+      color: var(--muted);
+      margin: 0 0 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .login-status.logged-in {
+      background: #d4f4dd;
+      color: #1b5f12;
+    }
+
+    .login-status.guest {
+      background: var(--chip);
+      color: var(--muted);
+    }
+
+    .login-status-text {
+      font-weight: 500;
+    }
+
+    .logout-btn {
+      background: none;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 0.85rem;
+      padding: 2px 4px;
+      margin: 0;
+    }
+
+    .logout-btn:hover {
+      opacity: 0.8;
+    }
+
+    .search {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: #fff;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .search:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(31, 102, 194, 0.16);
+    }
+
+    .layout {
+      max-height: 58vh;
+      overflow: auto;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .org-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .org-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fff;
+      transition: border-color 150ms ease, box-shadow 150ms ease, transform 120ms ease;
+      opacity: 0;
+      transform: translateY(3px);
+      animation: fadeSlide 240ms ease forwards;
+    }
+
+    .org-item:hover {
+      transform: translateY(-1px);
+      border-color: #b6cdef;
+      box-shadow: 0 6px 14px rgba(19, 67, 128, 0.08);
+    }
+
+    .org-item.active {
+      border-color: #9abbe7;
+      box-shadow: 0 8px 16px rgba(20, 74, 146, 0.11);
+      background: #fbfdff;
+    }
+
+    .org-trigger {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 0;
+      color: inherit;
+      font: inherit;
+    }
+
+    .org-title {
+      font-weight: 700;
+      font-size: 0.93rem;
+      line-height: 1.25;
+      margin-bottom: 3px;
+    }
+
+    .org-meta {
+      font-size: 0.79rem;
+      color: var(--muted);
+    }
+
+    .org-chevron {
+      font-size: 1.06rem;
+      color: var(--primary);
+      transition: transform 160ms ease;
+      line-height: 1;
+      transform-origin: center;
+    }
+
+    .org-chevron.open {
+      transform: rotate(180deg);
+    }
+
+    .org-details {
+      display: none;
+      margin-top: 10px;
+      animation: reveal 200ms ease;
+    }
+
+    .org-details.open {
+      display: block;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .chip {
+      background: var(--chip);
+      border: 1px solid #d5e3fa;
+      color: #1a4174;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    thead th {
+      text-align: left;
+      background: #f1f6ff;
+      color: #2b4e7d;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    tbody td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e7eef8;
+      vertical-align: top;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    a {
+      color: #1f66c2;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    .no-results {
+      padding: 14px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    .page-footnote {
+      border-top: 1px solid var(--line);
+      background: #1f66c2;
+      padding: 12px 14px;
+    }
+
+    .footnote-title {
+      margin: 0 0 6px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .footnote-text {
+      margin: 0;
+      font-size: 0.84rem;
+      color: #ffffff;
+      line-height: 1.4;
+    }
+
+    .coord-title {
+      margin: 10px 0 4px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .coord-list {
+      margin: 0;
+      padding-left: 16px;
+      color: #ffffff;
+      font-size: 0.83rem;
+      line-height: 1.45;
+    }
+
+    .coord-list li {
+      margin: 2px 0;
+    }
+
+    .page-footnote a {
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    @media (max-width: 980px) {
+      body { padding: 8px; }
+      .brand-logo { width: 210px; }
+      .auth-row { grid-template-columns: 1fr; }
+      .layout { max-height: none; }
+      h1 { font-size: 1.3rem; }
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(-2px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="brand-row">
+        <img src="./eiewg-logo.png" alt="Nigeria Education in Emergencies Working Group logo" class="brand-logo" />
+        <div class="brand-text">
+          <div class="kicker">EiEWG Contacts</div>
+          <h1>Members Directory</h1>
+          <p class="subtext">Use filters to narrow the list, then click an organization to view details.</p>
+        </div>
+      </div>
+      <div id="memberFilters" class="member-filters" role="group" aria-label="Member categories">
+        <button type="button" class="member-btn" data-member-filter="full">Full members</button>
+        <button type="button" class="member-btn" data-member-filter="associate">Associate members</button>
+        <button type="button" class="member-btn" data-member-filter="observer">Oberserver members</button>
+        <button type="button" class="member-btn active" data-member-filter="all">All members</button>
+        <button type="button" id="typeFilterBtn" class="member-btn" aria-label="Filter by organization type">Organization type: All</button>
+      </div>
+      <div class="action-row" role="group" aria-label="Data actions">
+        <button type="button" id="exportBtn" class="member-btn action-btn" hidden>Export</button>
+        <button type="button" id="loginBtn" class="member-btn action-btn" style="background-color: #10a854; color: white;">Admin Login</button>
+      </div>
+      <div id="loginStatus" class="login-status guest">
+        <span class="login-status-text">Logged in as: Guest (limited view)</span>
+      </div>
+      <div id="adminPanel" class="auth-panel" aria-label="Admin login credentials" hidden>
+        <div class="auth-row">
+          <input id="adminEmail" class="auth-input" type="email" placeholder="Admin email" autocomplete="username" />
+          <input id="adminPassword" class="auth-input" type="password" placeholder="Admin password" autocomplete="current-password" />
+        </div>
+        <div class="auth-action-row">
+          <button type="button" id="adminLoginBtn" class="member-btn action-btn">Login</button>
+          <button type="button" id="adminCancelBtn" class="member-btn">Cancel</button>
+        </div>
+        <p id="adminStatus" class="auth-status">Enter admin credentials to view full contact details.</p>
+      </div>
+
+      <input id="searchInput" class="search" type="search" placeholder="Search by organization, acronym, or type" autocomplete="off" />
+    </section>
+
+    <section class="layout">
+      <div id="orgList" class="org-list"></div>
+    </section>
+
+    <footer class="page-footnote">
+      <p class="footnote-title">Process Note</p>
+      <p class="footnote-text">Please note that this is an ongoing process and will continue to update partners details in real time.</p>
+      <p class="footnote-text">For inquiries or support on the organization status or other information on this process reach out via: <a href="mailto:chisom@lcpd.org.ng">chisom@lcpd.org.ng</a>, <a href="tel:+2348038132205">08038132205</a>.</p>
+
+      <p class="coord-title">Education sector coordination team</p>
+      <ul class="coord-list">
+        <li>Chisom Aniekwe, LCPD; <a href="tel:+2348038132205">+234 8038 132205</a>, Email: <a href="mailto:chisom@lcpd.org.ng">chisom@lcpd.org.ng</a></li>
+        <li> Adamu Bulama, UNICEF; <a href="tel:+2348064954658">+234 8064954658</a>, Email: <a href="mailto:abulama@unicef.org">abulama@unicef.org</a></li>
+        <li>Cleobas James, SCI; <a href="tel:+2348030969826">+234 803 096 9826</a>, Email: <a href="mailto:james.cleobas@savethechildren.org">james.cleobas@savethechildren.org</a></li>
+      </ul>
+    </footer>
+  </main>
+
+  <script src="./xlsx.full.min.js"></script>
+  <script>
+    let organizations = [];
+    const defaultWorkbookUrl = "https://docs.google.com/spreadsheets/d/1v01GoA0cBtZ0FjvaOqccyxugBo9zHiTiR6e2vHxLTMM/export?format=csv&gid=0";
+    let isLoadingOrganizations = true;
+    let loadErrorMessage = "";
+
+
+    const orgList = document.getElementById("orgList");
+    const searchInput = document.getElementById("searchInput");
+    const memberFilters = document.getElementById("memberFilters");
+    const memberButtons = [...memberFilters.querySelectorAll(".member-btn[data-member-filter]")];
+    const typeFilterBtn = document.getElementById("typeFilterBtn");
+    const exportBtn = document.getElementById("exportBtn");
+    const loginBtn = document.getElementById("loginBtn");
+    const adminPanel = document.getElementById("adminPanel");
+    const adminEmailInput = document.getElementById("adminEmail");
+    const adminPasswordInput = document.getElementById("adminPassword");
+    const adminLoginBtn = document.getElementById("adminLoginBtn");
+    const adminCancelBtn = document.getElementById("adminCancelBtn");
+    const adminStatus = document.getElementById("adminStatus");
+    const loginStatus = document.getElementById("loginStatus");
+
+    let filtered = [...organizations];
+    let openId = null;
+    let membershipFilter = "all";
+    let organizationTypeFilter = "all";
+    let organizationTypes = [];
+    let pendingSecureAction = "";
+    let currentLoggedInUser = ""; // Tracks currently logged-in user email
+    const authorizedEmail = "chisom@lcpd.org.ng";
+    const authorizedPassword = "EiEgit@";
+    const importedDataStorageKey = "eiewg-directory-imported-data-v1";
+
+    const escapeHtml = (value) => String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+
+    function textValue(value) {
+      return String(value || "").trim();
+    }
+
+    function saveImportedOrganizationsToStorage() {
+      try {
+        localStorage.setItem(importedDataStorageKey, JSON.stringify(organizations));
+      } catch (error) {
+        // Ignore storage failures (for example, private mode restrictions).
+      }
+    }
+
+    function loadImportedOrganizationsFromStorage() {
+      try {
+        const raw = localStorage.getItem(importedDataStorageKey);
+        if (!raw) {
+          return null;
+        }
+
+        const parsed = JSON.parse(raw);
+        const source = Array.isArray(parsed) ? parsed : (parsed && parsed.organizations);
+        if (!Array.isArray(source)) {
+          return null;
+        }
+
+        return normalizeImportedOrganizations(source);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function rebuildOrganizationTypes() {
+      organizationTypes = [...new Set(
+        organizations
+          .map((org) => `${org.organizationType || ""}`.trim())
+          .filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b));
+
+      const currentTypeExists = organizationTypes.some(
+        (type) => type.toUpperCase() === organizationTypeFilter.toUpperCase()
+      );
+
+      if (organizationTypeFilter !== "all" && !currentTypeExists) {
+        organizationTypeFilter = "all";
+      }
+    }
+
+    function openAdminPanel() {
+      adminPanel.hidden = false;
+      adminPasswordInput.value = "";
+      setAdminStatus("Enter admin credentials to view full contact details.", false);
+      if (!textValue(adminEmailInput.value)) {
+        adminEmailInput.value = authorizedEmail;
+      }
+      adminEmailInput.focus();
+    }
+
+    function closeAdminPanel(resetStatus = false) {
+      adminPanel.hidden = true;
+      adminPasswordInput.value = "";
+      if (resetStatus) {
+        setAdminStatus("Enter admin credentials to view full contact details.", false);
+      }
+    }
+
+    function setAdminStatus(message, isError = false) {
+      adminStatus.textContent = message;
+      adminStatus.classList.toggle("error", isError);
+      adminStatus.classList.toggle("ok", !isError);
+    }
+
+    function updateLoginStatus() {
+      if (currentLoggedInUser === authorizedEmail) {
+        loginStatus.className = "login-status logged-in";
+        loginStatus.innerHTML = `
+          <span class="login-status-text">Logged in as: ${escapeHtml(currentLoggedInUser)} (admin)</span>
+          <button type="button" class="logout-btn" id="logoutBtn">Logout</button>
+        `;
+        exportBtn.hidden = false;
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", () => {
+            currentLoggedInUser = "";
+            updateLoginStatus();
+            renderList();
+          });
+        }
+      } else {
+        loginStatus.className = "login-status guest";
+        loginStatus.innerHTML = `<span class="login-status-text">Logged in as: Guest (limited view)</span>`;
+        exportBtn.hidden = true;
+      }
+    }
+
+    function performAdminLogin() {
+      const email = textValue(adminEmailInput.value).toLowerCase();
+      const password = textValue(adminPasswordInput.value);
+
+      if (!email || !password) {
+        setAdminStatus("Enter both email and password to login.", true);
+        return;
+      }
+
+      const emailMatches = email === authorizedEmail.toLowerCase();
+      const passwordMatches = password === authorizedPassword
+        || password.toLowerCase() === authorizedPassword.toLowerCase();
+
+      if (!emailMatches || !passwordMatches) {
+        setAdminStatus("Access denied. Email or password is incorrect.", true);
+        return;
+      }
+
+      currentLoggedInUser = email;
+      setAdminStatus("Login successful! You now have admin access.");
+      setTimeout(() => {
+        closeAdminPanel(false);
+        updateLoginStatus();
+        renderList();
+      }, 800);
+    }
+
+    function normalizeImportedOrganizations(source) {
+      return source
+        .map((org, index) => {
+          const orgName = textValue(org.organization || org.organizationName || org.name);
+          const orgType = textValue(org.organizationType || org.type).toUpperCase();
+          const contactsSource = Array.isArray(org.contacts) ? org.contacts : [];
+
+          const contacts = contactsSource
+            .map((contact) => {
+              const fallbackName = `${textValue(contact.firstName)} ${textValue(contact.lastName)}`.trim();
+              const fullName = textValue(contact.fullName || contact.name || fallbackName || "N/A");
+              return {
+                fullName,
+                designation: textValue(contact.designation || contact.title || "N/A"),
+                email: textValue(contact.email).toLowerCase(),
+                phone: textValue(contact.phone || contact.phone_number || "")
+              };
+            })
+            .filter((contact) => contact.fullName || contact.designation || contact.email);
+
+          return {
+            id: `org-${index + 1}`,
+            organization: orgName,
+            acronym: textValue(org.acronym),
+            organizationType: orgType,
+            membership: textValue(org.membership).toLowerCase(),
+            contactCount: contacts.length,
+            contacts
+          };
+        })
+        .filter((org) => org.organization);
+    }
+
+    function getFieldValue(row, fieldNames) {
+      const entries = Object.entries(row || {});
+      for (const name of fieldNames) {
+        const expected = name.toLowerCase();
+        const match = entries.find(([key]) => textValue(key).toLowerCase() === expected);
+        if (match) {
+          return textValue(match[1]);
+        }
+      }
+
+      return "";
+    }
+
+    function getMembershipFromSheetName(sheetName) {
+      const value = textValue(sheetName).toLowerCase();
+      if (value.includes("full")) {
+        return "full";
+      }
+      if (value.includes("associate")) {
+        return "associate";
+      }
+      if (value.includes("observer") || value.includes("oberserver")) {
+        return "observer";
+      }
+      return "";
+    }
+
+    function getSheetImportPriority(sheetName) {
+      const value = textValue(sheetName).toLowerCase();
+      if (value.includes("full")) {
+        return 1;
+      }
+      if (value.includes("associate")) {
+        return 2;
+      }
+      if (value.includes("observer") || value.includes("oberserver")) {
+        return 3;
+      }
+      return 4;
+    }
+
+    function normalizeFlatContactRow(row, fallbackMembership, sourcePriority = 1) {
+      const firstName = getFieldValue(row, ["first name", "firstname"]);
+      const lastName = getFieldValue(row, ["last name", "lastname"]);
+      const fullNameFromRow = getFieldValue(row, ["full name", "contact name", "name"]);
+      const fullName = textValue(fullNameFromRow || `${firstName} ${lastName}`.trim() || "N/A");
+
+      return {
+        organization: getFieldValue(row, ["organization full name", "organization", "organisation full name", "organisation"]),
+        acronym: getFieldValue(row, ["acronym"]),
+        organizationType: getFieldValue(row, ["organization type", "type", "organisation type"]).toUpperCase(),
+        membership: (fallbackMembership || getFieldValue(row, ["membership", "member category"]) || "").toLowerCase(),
+        fullName,
+        designation: getFieldValue(row, ["designation", "title", "position"]) || "N/A",
+        email: getFieldValue(row, ["email", "mail"]).toLowerCase(),
+        phone: getFieldValue(row, ["phone", "phone number", "mobile", "telephone"]),
+        sourcePriority
+      };
+    }
+
+    function buildOrganizationsFromFlatRows(flatRows) {
+      const grouped = new Map();
+
+      flatRows.forEach((row) => {
+        const orgName = textValue(row.organization);
+        if (!orgName) {
+          return;
+        }
+
+        const key = `${orgName}||${textValue(row.acronym)}||${textValue(row.organizationType)}`;
+        if (!grouped.has(key)) {
+          grouped.set(key, {
+            organization: orgName,
+            acronym: textValue(row.acronym),
+            organizationType: textValue(row.organizationType).toUpperCase(),
+            membership: textValue(row.membership).toLowerCase(),
+            membershipPriority: Number(row.sourcePriority) || 1,
+            contactMap: new Map()
+          });
+        }
+
+        const target = grouped.get(key);
+        const rowPriority = Number(row.sourcePriority) || 1;
+        if (row.membership && (!target.membership || rowPriority <= target.membershipPriority)) {
+          target.membership = textValue(row.membership).toLowerCase();
+          target.membershipPriority = rowPriority;
+        }
+
+        const contact = {
+          fullName: textValue(row.fullName) || "N/A",
+          designation: textValue(row.designation) || "N/A",
+          email: textValue(row.email).toLowerCase(),
+          phone: textValue(row.phone),
+          sourcePriority: rowPriority
+        };
+
+        const contactKey = contact.email
+          ? `email:${contact.email}`
+          : `name:${contact.fullName.toLowerCase()}`;
+
+        const existingContact = target.contactMap.get(contactKey);
+        if (!existingContact || contact.sourcePriority <= existingContact.sourcePriority) {
+          target.contactMap.set(contactKey, contact);
+        }
+      });
+
+      return [...grouped.values()]
+        .sort((a, b) => a.organization.localeCompare(b.organization))
+        .map((org, index) => {
+          const contacts = [...org.contactMap.values()]
+            .sort((a, b) => a.fullName.localeCompare(b.fullName))
+            .map(({ sourcePriority, ...contact }) => contact);
+
+          return {
+            id: `org-${index + 1}`,
+            organization: org.organization,
+            acronym: org.acronym,
+            organizationType: org.organizationType,
+            membership: org.membership,
+            contactCount: contacts.length,
+            contacts
+          };
+        });
+    }
+
+    function buildFlatRowsFromOrganizations() {
+      const rows = [];
+      organizations.forEach((org) => {
+        const memberGroup = getMembershipGroup(org);
+        const membershipLabel = memberGroup === "full"
+          ? "Full members"
+          : memberGroup === "associate"
+            ? "Associate members"
+            : memberGroup === "observer"
+              ? "Oberserver members"
+              : "";
+
+        org.contacts.forEach((contact) => {
+          const parts = textValue(contact.fullName).split(/\s+/).filter(Boolean);
+          const firstName = parts.length ? parts[0] : "";
+          const lastName = parts.length > 1 ? parts.slice(1).join(" ") : "";
+
+          rows.push({
+            "First name": firstName,
+            "Last name": lastName,
+            "Full name": textValue(contact.fullName),
+            "Organization full name": textValue(org.organization),
+            "Acronym": textValue(org.acronym),
+            "Organization type": textValue(org.organizationType).toUpperCase(),
+            "Membership": membershipLabel,
+            "Designation": textValue(contact.designation),
+            "Phone": textValue(contact.phone),
+            "Email": textValue(contact.email).toLowerCase()
+          });
+        });
+      });
+
+      return rows;
+    }
+
+    function buildWorksheet(rows, headers) {
+      const normalized = rows.map((row) => {
+        const output = {};
+        headers.forEach((header) => {
+          output[header] = textValue(row[header]);
+        });
+        return output;
+      });
+
+      return XLSX.utils.json_to_sheet(normalized, {
+        header: headers,
+        skipHeader: false
+      });
+    }
+
+    function parseCsvText(csvText) {
+      const lines = csvText.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+      const rows = [];
+
+      for (const line of lines) {
+        if (!line.trim()) {
+          continue;
+        }
+
+        const cells = [];
+        let current = "";
+        let isQuoted = false;
+
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+
+          if (char === '"') {
+            if (isQuoted && line[i + 1] === '"') {
+              current += '"';
+              i += 1;
+              continue;
+            }
+            isQuoted = !isQuoted;
+            continue;
+          }
+
+          if (char === "," && !isQuoted) {
+            cells.push(current.trim());
+            current = "";
+            continue;
+          }
+
+          current += char;
+        }
+
+        cells.push(current.trim());
+        rows.push(cells);
+      }
+
+      if (!rows.length) {
+        return [];
+      }
+
+      const head = rows[0];
+      const second = rows[1] || [];
+      const knownHeaders = new Set(["membership", "designation", "phone", "email"]);
+      let headers = [...head];
+
+      if (second.some((value) => knownHeaders.has(String(value || "").trim().toLowerCase()))) {
+        let insertIndex = headers.findIndex((value) => !String(value || "").trim());
+        if (insertIndex === -1) {
+          insertIndex = headers.length;
+        }
+
+        let rowIndex = 0;
+        while (rowIndex < second.length) {
+          if (insertIndex < headers.length) {
+            if (!String(headers[insertIndex] || "").trim()) {
+              headers[insertIndex] = second[rowIndex] || "";
+            } else {
+              headers.splice(insertIndex, 0, second[rowIndex] || "");
+            }
+          } else {
+            headers.push(second[rowIndex] || "");
+          }
+          insertIndex += 1;
+          rowIndex += 1;
+        }
+      }
+
+      return rows.slice(2).map((row) => {
+        const record = {};
+        for (let i = 0; i < headers.length; i += 1) {
+          record[headers[i] || `Column${i + 1}`] = row[i] || "";
+        }
+        return record;
+      });
+    }
+
+    function parseCsvSheetToOrganizations(csvText) {
+      const rows = parseCsvText(csvText);
+      if (!rows.length) {
+        return [];
+      }
+
+      const normalized = rows
+        .map((row) => normalizeFlatContactRow(row, "", 1))
+        .filter((row) => row.organization);
+
+      return buildOrganizationsFromFlatRows(normalized);
+    }
+
+    function parseWorkbookToOrganizations(workbook) {
+      const sheetNames = workbook.SheetNames || [];
+
+      if (!sheetNames.length) {
+        throw new Error("Imported workbook has no sheets.");
+      }
+
+      const categorySheets = sheetNames.filter((sheetName) => {
+        const lower = textValue(sheetName).toLowerCase();
+        return lower.includes("full")
+          || lower.includes("associate")
+          || lower.includes("observer")
+          || lower.includes("oberserver");
+      });
+
+      const targetSheets = categorySheets.length
+        ? [...categorySheets].sort((a, b) => getSheetImportPriority(a) - getSheetImportPriority(b))
+        : [...sheetNames];
+
+      const flatRows = [];
+      const importSheetStats = [];
+      targetSheets.forEach((sheetName) => {
+        const worksheet = workbook.Sheets[sheetName];
+        if (!worksheet) {
+          return;
+        }
+
+        const fallbackMembership = getMembershipFromSheetName(sheetName);
+        const sourcePriority = getSheetImportPriority(sheetName);
+        const rows = XLSX.utils.sheet_to_json(worksheet, { defval: "", raw: false });
+        let acceptedRows = 0;
+        rows.forEach((row) => {
+          const normalized = normalizeFlatContactRow(row, fallbackMembership, sourcePriority);
+          if (normalized.organization) {
+            flatRows.push(normalized);
+            acceptedRows++;
+          }
+        });
+
+        importSheetStats.push(`${sheetName}: ${acceptedRows}`);
+      });
+
+      return {
+        imported: buildOrganizationsFromFlatRows(flatRows),
+        importSheetStats
+      };
+    }
+
+    async function loadOrganizationsFromWorkbookUrl(url) {
+      const cacheBustedUrl = `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`;
+      const response = await fetch(cacheBustedUrl, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`Could not load sheet data (${response.status}).`);
+      }
+
+      const responseType = response.headers.get("content-type") || "";
+      const shouldParseCsv = responseType.includes("text/csv")
+        || responseType.includes("application/vnd.ms-excel")
+        || url.toLowerCase().includes("format=csv")
+        || url.toLowerCase().endsWith(".csv");
+
+      if (shouldParseCsv) {
+        const csvText = await response.text();
+        return parseCsvSheetToOrganizations(csvText);
+      }
+
+      if (typeof XLSX === "undefined") {
+        throw new Error("Excel engine missing. Keep xlsx.full.min.js in the same folder for workbook import/export.");
+      }
+
+      const workbookBytes = await response.arrayBuffer();
+      const workbook = XLSX.read(workbookBytes, { type: "array" });
+      return parseWorkbookToOrganizations(workbook).imported;
+    }
+
+    function applyImportedOrganizations(imported, persist = true) {
+      organizations = Array.isArray(imported) ? imported : [];
+      filtered = [];
+      openId = null;
+      membershipFilter = "all";
+      organizationTypeFilter = "all";
+      searchInput.value = "";
+      isLoadingOrganizations = false;
+      loadErrorMessage = "";
+      if (persist) {
+        saveImportedOrganizationsToStorage();
+      }
+      rebuildOrganizationTypes();
+      applySearch();
+    }
+
+    async function initializeOrganizations() {
+      try {
+        const imported = await loadOrganizationsFromWorkbookUrl(defaultWorkbookUrl);
+        applyImportedOrganizations(imported, true);
+      } catch (error) {
+        const storedOrganizations = loadImportedOrganizationsFromStorage();
+        if (Array.isArray(storedOrganizations)) {
+          applyImportedOrganizations(storedOrganizations, false);
+          loadErrorMessage = "Sheet data could not be loaded, so cached data is shown. Update the Google Sheet and refresh to sync.";
+          renderList();
+          return;
+        }
+
+        organizations = [];
+        filtered = [];
+        openId = null;
+        membershipFilter = "all";
+        organizationTypeFilter = "all";
+        isLoadingOrganizations = false;
+        loadErrorMessage = "Could not load sheet data automatically. Refresh the page after updating the Google Sheet.";
+        rebuildOrganizationTypes();
+        setActiveMemberButton();
+        setTypeFilterButton();
+        renderList();
+      }
+    }
+
+    function exportOrganizations() {
+      if (typeof XLSX === "undefined") {
+        const payload = {
+          exportedAt: new Date().toISOString(),
+          organizationCount: organizations.length,
+          organizations
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const stamp = new Date().toISOString().replace(/[.:]/g, "-");
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `organization-directory-${stamp}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      const headers = [
+        "First name",
+        "Last name",
+        "Full name",
+        "Organization full name",
+        "Acronym",
+        "Organization type",
+        "Membership",
+        "Designation",
+        "Phone",
+        "Email"
+      ];
+
+      const allRows = buildFlatRowsFromOrganizations();
+      const fullRows = allRows.filter((row) => textValue(row.Membership).toLowerCase().includes("full"));
+      const associateRows = allRows.filter((row) => textValue(row.Membership).toLowerCase().includes("associate"));
+      const observerRows = allRows.filter((row) => {
+        const value = textValue(row.Membership).toLowerCase();
+        return value.includes("observer") || value.includes("oberserver");
+      });
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, buildWorksheet(fullRows, headers), "Full members");
+      XLSX.utils.book_append_sheet(workbook, buildWorksheet(associateRows, headers), "Associate members");
+      XLSX.utils.book_append_sheet(workbook, buildWorksheet(observerRows, headers), "Oberserver members");
+
+      const stamp = new Date().toISOString().replace(/[.:]/g, "-");
+      XLSX.writeFile(workbook, `Contact list.current.${stamp}.xlsx`);
+    }
+
+
+    function getMembershipGroup(org) {
+      const rawMembership = `${org.membership || ""}`.trim().toLowerCase();
+      const rawType = `${org.organizationType || ""}`.trim().toUpperCase();
+
+      if (rawMembership.includes("full")) {
+        return "full";
+      }
+      if (rawMembership.includes("associate")) {
+        return "associate";
+      }
+      if (rawMembership.includes("observer") || rawMembership.includes("oberserver")) {
+        return "observer";
+      }
+
+      if (rawType === "NNGO") {
+        return "full";
+      }
+      if (rawType === "INGO") {
+        return "associate";
+      }
+      if (rawType === "UN") {
+        return "observer";
+      }
+
+      return "all";
+    }
+
+    function setActiveMemberButton() {
+      memberButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.memberFilter === membershipFilter);
+      });
+    }
+
+    function setTypeFilterButton() {
+      const isAll = organizationTypeFilter === "all";
+      typeFilterBtn.textContent = isAll
+        ? "Organization type: All"
+        : `Organization type: ${organizationTypeFilter}`;
+      typeFilterBtn.classList.toggle("type-active", !isAll);
+    }
+
+    function moveToNextOrganizationType() {
+      if (!organizationTypes.length) {
+        organizationTypeFilter = "all";
+        return;
+      }
+
+      if (organizationTypeFilter === "all") {
+        organizationTypeFilter = organizationTypes[0];
+        return;
+      }
+
+      const currentIndex = organizationTypes.findIndex(
+        (type) => type.toUpperCase() === organizationTypeFilter.toUpperCase()
+      );
+
+      if (currentIndex === -1 || currentIndex === organizationTypes.length - 1) {
+        organizationTypeFilter = "all";
+      } else {
+        organizationTypeFilter = organizationTypes[currentIndex + 1];
+      }
+    }
+
+    function buildRows(contacts) {
+      const isAdmin = currentLoggedInUser === authorizedEmail;
+      
+      return contacts.map((contact) => {
+        // Conditionally show email and phone only to admin
+        const emailDisplay = isAdmin && contact.email
+          ? `<a href="mailto:${escapeHtml(contact.email)}">${escapeHtml(contact.email)}</a>`
+          : isAdmin ? "-" : "***";
+        
+        const phoneDisplay = isAdmin && contact.phone
+          ? `<a href="tel:${escapeHtml(contact.phone)}">${escapeHtml(contact.phone)}</a>`
+          : isAdmin ? "-" : "***";
+
+        return `
+          <tr>
+            <td>${escapeHtml(contact.fullName)}</td>
+            <td>${escapeHtml(contact.designation)}</td>
+            <td>${phoneDisplay}</td>
+            <td>${emailDisplay}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function renderList() {
+      if (isLoadingOrganizations) {
+        orgList.innerHTML = '<div class="no-results">Loading organizations from workbook...</div>';
+        return;
+      }
+
+      if (loadErrorMessage) {
+        orgList.innerHTML = `<div class="no-results">${escapeHtml(loadErrorMessage)}</div>`;
+        return;
+      }
+
+      if (!filtered.length) {
+        orgList.innerHTML = '<div class="no-results">No organizations match this search.</div>';
+        return;
+      }
+
+      orgList.innerHTML = "";
+
+      filtered.forEach((org, index) => {
+        const card = document.createElement("article");
+        const isOpen = org.id === openId;
+        card.className = `org-item${isOpen ? " active" : ""}`;
+        card.style.animationDelay = `${Math.min(index * 22, 220)}ms`;
+
+        const rows = buildRows(org.contacts);
+        card.innerHTML = `
+          <button type="button" class="org-trigger" aria-expanded="${isOpen}">
+            <div>
+              <div class="org-title">${escapeHtml(org.organization)}</div>
+              <div class="org-meta">${escapeHtml(org.organizationType || "Type not set")} - ${org.contactCount} contact${org.contactCount === 1 ? "" : "s"}</div>
+            </div>
+            <span class="org-chevron${isOpen ? " open" : ""}">v</span>
+          </button>
+
+          <div class="org-details${isOpen ? " open" : ""}">
+            <div class="chips">
+              <div class="chip">Acronym: ${escapeHtml(org.acronym || "N/A")}</div>
+              <div class="chip">Type: ${escapeHtml(org.organizationType || "N/A")}</div>
+              <div class="chip">Contacts: ${org.contactCount}</div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Contact Name</th>
+                    <th>Designation</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows || '<tr><td colspan="4">No contacts available.</td></tr>'}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+
+        const trigger = card.querySelector(".org-trigger");
+        trigger.addEventListener("click", () => {
+          openId = openId === org.id ? null : org.id;
+          renderList();
+        });
+
+        orgList.appendChild(card);
+      });
+    }
+
+    function applySearch() {
+      const query = searchInput.value.trim().toLowerCase();
+      filtered = organizations.filter((org) => {
+        const text = `${org.organization} ${org.acronym || ""} ${org.organizationType || ""}`.toLowerCase();
+        const matchesSearch = text.includes(query);
+        const matchesMembership = membershipFilter === "all" || getMembershipGroup(org) === membershipFilter;
+        const matchesType = organizationTypeFilter === "all"
+          || `${org.organizationType || ""}`.trim().toUpperCase() === organizationTypeFilter.toUpperCase();
+        return matchesSearch && matchesMembership && matchesType;
+      });
+
+      if (!filtered.some((org) => org.id === openId)) {
+        openId = null;
+      }
+
+      setActiveMemberButton();
+      setTypeFilterButton();
+      renderList();
+    }
+
+    memberButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        membershipFilter = button.dataset.memberFilter || "all";
+        applySearch();
+      });
+    });
+
+    typeFilterBtn.addEventListener("click", () => {
+      moveToNextOrganizationType();
+      applySearch();
+    });
+
+    exportBtn.addEventListener("click", () => {
+      exportOrganizations();
+    });
+
+    loginBtn.addEventListener("click", () => {
+      openAdminPanel();
+    });
+
+    adminLoginBtn.addEventListener("click", () => {
+      performAdminLogin();
+    });
+
+    adminCancelBtn.addEventListener("click", () => {
+      closeAdminPanel(true);
+    });
+
+    adminPasswordInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        performAdminLogin();
+      }
+    });
+
+    searchInput.addEventListener("input", applySearch);
+
+    rebuildOrganizationTypes();
+    setActiveMemberButton();
+    setTypeFilterButton();
+    updateLoginStatus();
+    renderList();
+    initializeOrganizations();
+  </script>
+</body>
+</html>
